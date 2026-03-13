@@ -1,7 +1,6 @@
 (ns borba.runtime.main
   (:gen-class)
-  (:require [aero.core :as aero]
-            [borba.runtime.config :as config]
+  (:require [borba.runtime.config :as config]
             [borba.runtime.system :as system]
             [clojure.java.io :as io]))
 
@@ -16,9 +15,11 @@
     @(promise)))
 
 (defn -main
-  [& [profile]]
-  (let [base            (aero/read-config (io/resource "config/base.edn") {})
-        core-ns         (symbol (:service/core-ns base))
-        default-profile (name (:service/default-profile base "stag"))]
+  [& [profile-str]]
+  (let [initial-profile (keyword (or profile-str "stag"))
+        cfg             (config/load-config initial-profile)
+        core-ns         (symbol (:service/core-ns cfg))
+        default-profile (:service/default-profile cfg :stag)
+        active-profile  (keyword (or profile-str (name default-profile)))]
     (require core-ns)
-    (run {:profile (keyword (or profile default-profile))})))
+    (run {:profile active-profile})))
