@@ -6,12 +6,10 @@
 
 (defn start!
   [config]
-
-  (reset! system (ig/init config)))
+  (reset! system (ig/init (:ig/system config))))
 
 (defn stop!
   []
-
   (when @system
     (ig/halt! @system)
     (reset! system nil)))
